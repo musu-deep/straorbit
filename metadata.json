@@ -1,0 +1,6 @@
+{
+  "name": "STRAORBIT",
+  "description": "Multilingual AI Strategic Intelligence Platform that transforms collective ambition into measurable, validated strategies.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
