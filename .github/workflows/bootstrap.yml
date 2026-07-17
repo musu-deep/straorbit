@@ -1,0 +1,42 @@
+name: Bootstrap source
+
+on:
+  push:
+    branches: [agent/prepare-straorbit]
+    paths:
+      - ".upload/**"
+      - ".github/workflows/bootstrap.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/prepare-straorbit
+
+      - name: Restore source
+        run: |
+          cat .upload/part-* | base64 --decode > /tmp/straorbit-source.tar.gz
+          echo "f38ba7275f990693fd4e44e1da6831e8ca02b4f0dccfc3787270827ae0590c76  /tmp/straorbit-source.tar.gz" | sha256sum --check
+          mkdir -p /tmp/straorbit-source
+          tar -xzf /tmp/straorbit-source.tar.gz -C /tmp/straorbit-source
+          rsync -a --delete \
+            --exclude .git \
+            --exclude .upload \
+            --exclude .github/workflows/bootstrap.yml \
+            /tmp/straorbit-source/ ./
+          rm -rf .upload
+          rm -f .github/workflows/bootstrap.yml
+
+      - name: Commit unpacked project
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Prepare STRAORBIT for production" || exit 0
+          git push origin HEAD:agent/prepare-straorbit
